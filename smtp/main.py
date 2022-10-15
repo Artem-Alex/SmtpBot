@@ -14,6 +14,7 @@ Subject: Привет!
 
 
 def main():
+
     context = ssl.create_default_context()
     # with smtplib.SMTP('smtp.gmail.com', PORT) as server:
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
