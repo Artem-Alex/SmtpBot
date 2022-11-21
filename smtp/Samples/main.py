@@ -3,9 +3,7 @@ import smtplib
 import ssl
 import sys
 
-LOGIN = "goreevartoum@gmail.com"
-PASSWORD = "hcvjuxfdyvccdcdh"
-PORT = 587
+from smtp.config import LOGIN, PASSWORD, PORT
 
 address = "artiom.goreev@yandex.ru"
 message = """\
