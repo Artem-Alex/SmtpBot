@@ -6,9 +6,9 @@ from smtp.config import LOGIN, PASSWORD, PORT
 
 
 class MessageSender:
-    def __init__(self, address: string, message: string):
+    def __init__(self, address: string, message_subject: string, message_body: string):
         self.__address = address
-        self.__message = message
+        self.__message = f"{message_subject}\n{message_body}"
         self.__smtp_address = "smtp.gmail.com"
 
     def __choose_smtp_address(self) -> string:
