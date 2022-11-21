@@ -3,8 +3,8 @@ import smtplib
 import ssl
 import sys
 
-LOGIN = 'goreevartoum@gmail.com'
-PASSWORD = 'hcvjuxfdyvccdcdh'
+LOGIN = "goreevartoum@gmail.com"
+PASSWORD = "hcvjuxfdyvccdcdh"
 PORT = 587
 
 address = "artiom.goreev@yandex.ru"
@@ -35,5 +35,5 @@ def main():
             print("[Exception]", e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main()) or 0
