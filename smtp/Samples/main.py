@@ -3,15 +3,16 @@ import smtplib
 import ssl
 import sys
 
-LOGIN = 'goreevartoum@gmail.com'
-PASSWORD = 'hcvjuxfdyvccdcdh'
-PORT = 587
+from smtp.config import LOGIN, PASSWORD, PORT
 
 address = "artiom.goreev@yandex.ru"
-# text = input("[Template] Breaking bad!\n")
 message = """\
-Subject: Привет!
-[Template] Это письмо было отправлено из Python."""
+Subject: Вопросы по АГПЧП
+
+Добрый вечер, Вадим Вадимович!
+ 
+По присланным Вами статьям мне, наконец-то, удалось поправить все опечатки в формулах (осталась одно неоднозначное место).
+Можно ли завтра к Вам подойти в 12:20 — 12:30?"""
 
 
 def main():
@@ -32,5 +33,5 @@ def main():
             print("[Exception]", e)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     sys.exit(main()) or 0
