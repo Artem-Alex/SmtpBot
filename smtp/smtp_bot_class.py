@@ -7,6 +7,7 @@ from config import TOKEN
 from form_classes import StartDialogForm, SendMessageDialogForm
 from singleton_wrapper import singleton
 from send_message_class import MessageSender
+from database_class import Database
 
 
 @singleton
@@ -50,10 +51,11 @@ class SmtpBot:
         await state.update_data(password=message.text)
 
         data = await state.get_data()
-        print(
-            f"mail= {data.get('mail', None)}\n"
-            f"password= {data.get('password', None)}"
-        )
+        mail = data.get("mail", None)
+        password = data.get("password", None)
+        user_id = message.chat.id
+        Database.insert_mail(user_id, mail)
+        print(f"mail= {mail}\n" f"password= {password}")
         await state.finish()
         await message.reply("Данные сохранены")
 
@@ -91,9 +93,12 @@ class SmtpBot:
         title = data.get("message_subject", None)
         text = data.get("message_body", None)
 
+        user_id = message.chat.id
+        login = Database.select_mail(user_id)
+
         print(f"mail= {address}\n" f"Title= {title}\nText= {text}")
 
-        ms = MessageSender(address, title, text)
+        ms = MessageSender(login, address, title, text)
         # ms.send_message()
 
         await state.finish()
