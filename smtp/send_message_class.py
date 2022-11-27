@@ -1,17 +1,19 @@
 import smtplib
 import ssl
-import string
 
-from smtp.config import LOGIN, PASSWORD, PORT
+from smtp.config import PASSWORD, PORT
 
 
 class MessageSender:
-    def __init__(self, address: string, message: string):
+    def __init__(
+        self, login: str, address: str, message_subject: str, message_body: str
+    ):
+        self.__login = login
         self.__address = address
-        self.__message = message
+        self.__message = f"{message_subject}\n{message_body}"
         self.__smtp_address = "smtp.gmail.com"
 
-    def __choose_smtp_address(self) -> string:
+    def __choose_smtp_address(self) -> str:
         pass
 
     def send_message(self):
@@ -20,6 +22,6 @@ class MessageSender:
             server.ehlo()
             server.starttls(context=context)
             server.ehlo()
-            server.login(LOGIN, PASSWORD)
-            server.sendmail(LOGIN, self.__address, self.__message.encode())
+            server.login(self.__login, PASSWORD)
+            server.sendmail(self.__login, self.__address, self.__message.encode())
             print("[INFO] Mail send")

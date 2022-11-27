@@ -4,8 +4,10 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
 from config import TOKEN
-from start_dialog_form_class import StartDialogForm
+from form_classes import StartDialogForm, SendMessageDialogForm
 from singleton_wrapper import singleton
+from send_message_class import MessageSender
+from database_class import Database
 
 
 @singleton
@@ -49,8 +51,55 @@ class SmtpBot:
         await state.update_data(password=message.text)
 
         data = await state.get_data()
-        print(
-            f"mail={data.get('mail', None)}\n" f"password={data.get('password', None)}"
-        )
+        mail = data.get("mail", None)
+        password = data.get("password", None)
+        user_id = message.chat.id
+        Database.insert_mail(user_id, mail)
+        print(f"mail= {mail}\n" f"password= {password}")
         await state.finish()
         await message.reply("Данные сохранены")
+
+    @staticmethod
+    @__dp.message_handler(commands=["send"])
+    async def cmd_send(message: types.Message):
+        await SendMessageDialogForm.address.set()
+        await message.reply(
+            "Приветствую, укажи адрес электронной почты на которую нужно отправить письмо"
+        )
+
+    @staticmethod
+    @__dp.message_handler(Text, state=SendMessageDialogForm.address)
+    async def process_address(message: types.Message, state: FSMContext):
+        await state.update_data(address=message.text)
+
+        await SendMessageDialogForm.next()
+        await message.reply("Укажи заголовок письма")
+
+    @staticmethod
+    @__dp.message_handler(Text, state=SendMessageDialogForm.message_subject)
+    async def process_message_subject(message: types.Message, state: FSMContext):
+        await state.update_data(message_subject=message.text)
+
+        await SendMessageDialogForm.next()
+        await message.reply("Введи текст письма")
+
+    @staticmethod
+    @__dp.message_handler(Text, state=SendMessageDialogForm.message_body)
+    async def process_message_body(message: types.Message, state: FSMContext):
+        await state.update_data(message_body=message.text)
+
+        data = await state.get_data()
+        address = data.get("address", None)
+        title = data.get("message_subject", None)
+        text = data.get("message_body", None)
+
+        user_id = message.chat.id
+        login = Database.select_mail(user_id)
+
+        print(f"mail= {address}\n" f"Title= {title}\nText= {text}")
+
+        ms = MessageSender(login, address, title, text)
+        # ms.send_message()
+
+        await state.finish()
+        await message.reply("Письмо отправленно")
