@@ -10,3 +10,7 @@ class SendMessageDialogForm(StatesGroup):
     address: State = State()
     message_subject: State = State()
     message_body: State = State()
+
+
+class MainDialogForm(StatesGroup):
+    main: State = State()

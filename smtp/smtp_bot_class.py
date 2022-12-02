@@ -4,10 +4,11 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
 from config import TOKEN
-from form_classes import StartDialogForm, SendMessageDialogForm
+from form_classes import StartDialogForm, SendMessageDialogForm, MainDialogForm
 from singleton_wrapper import singleton
 from send_message_class import MessageSender
 from database_class import Database
+from keyboards import MainKeyboard
 
 
 @singleton
@@ -23,8 +24,17 @@ class SmtpBot:
     @staticmethod
     @__dp.message_handler(commands=["start"])
     async def cmd_start(message: types.Message):
+        if Database.select_mail(message.chat.id) is not None:
+            Database.delete_mail(message.chat.id)
+
         await StartDialogForm.mail.set()
-        await message.reply("Приветствую, укажи адрес своей электронной почты")
+        await message.answer("Приветствую, укажи адрес своей электронной почты")
+
+    @staticmethod
+    @__dp.message_handler(commands=["continue"])
+    async def cmd_continue(message: types.Message):
+        await MainDialogForm.main.set()
+        await message.answer("Что хотите сделать?", reply_markup=MainKeyboard.main_kb)
 
     @staticmethod
     @__dp.message_handler(state="*", commands="cancel")
@@ -35,7 +45,10 @@ class SmtpBot:
             return
 
         await state.finish()
-        await message.reply("ОК")
+        await message.answer("ОК")
+
+        await MainDialogForm.main.set()
+        await message.answer("Что хотите сделать?", reply_markup=MainKeyboard.main_kb)
 
     @staticmethod
     @__dp.message_handler(Text, state=StartDialogForm.mail)
@@ -43,7 +56,7 @@ class SmtpBot:
         await state.update_data(mail=message.text)
 
         await StartDialogForm.next()
-        await message.reply("Укажи пароль от этой почты")
+        await message.answer("Укажи пароль от этой почты")
 
     @staticmethod
     @__dp.message_handler(Text, state=StartDialogForm.password)
@@ -57,13 +70,17 @@ class SmtpBot:
         Database.insert_mail(user_id, mail)
         print(f"mail= {mail}\n" f"password= {password}")
         await state.finish()
-        await message.reply("Данные сохранены")
+        await message.answer("Данные сохранены")
+        await MainDialogForm.main.set()
+        await message.answer("Что хотите сделать?", reply_markup=MainKeyboard.main_kb)
 
     @staticmethod
-    @__dp.message_handler(commands=["send"])
+    @__dp.message_handler(
+        Text(equals="Отправить письмо", ignore_case=True), state=MainDialogForm.main
+    )
     async def cmd_send(message: types.Message):
         await SendMessageDialogForm.address.set()
-        await message.reply(
+        await message.answer(
             "Приветствую, укажи адрес электронной почты на которую нужно отправить письмо"
         )
 
@@ -73,7 +90,7 @@ class SmtpBot:
         await state.update_data(address=message.text)
 
         await SendMessageDialogForm.next()
-        await message.reply("Укажи заголовок письма")
+        await message.answer("Укажи заголовок письма")
 
     @staticmethod
     @__dp.message_handler(Text, state=SendMessageDialogForm.message_subject)
@@ -81,7 +98,7 @@ class SmtpBot:
         await state.update_data(message_subject=message.text)
 
         await SendMessageDialogForm.next()
-        await message.reply("Введи текст письма")
+        await message.answer("Введи текст письма")
 
     @staticmethod
     @__dp.message_handler(Text, state=SendMessageDialogForm.message_body)
@@ -102,4 +119,7 @@ class SmtpBot:
         # ms.send_message()
 
         await state.finish()
-        await message.reply("Письмо отправленно")
+        await message.answer("Письмо отправленно")
+
+        await MainDialogForm.main.set()
+        await message.answer("Что хотите сделать?", reply_markup=MainKeyboard.main_kb)
