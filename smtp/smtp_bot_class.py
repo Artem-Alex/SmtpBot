@@ -9,6 +9,7 @@ from singleton_wrapper import singleton
 from send_message_class import MessageSender
 from database_class import Database
 from keyboards import MainKeyboard
+from email_validator_class import EmailValidator
 
 
 @singleton
@@ -53,10 +54,12 @@ class SmtpBot:
     @staticmethod
     @__dp.message_handler(Text, state=StartDialogForm.mail)
     async def process_mail(message: types.Message, state: FSMContext):
-        await state.update_data(mail=message.text)
-
-        await StartDialogForm.next()
-        await message.answer("Укажи пароль от этой почты")
+        if EmailValidator.validate_email(message.text):
+            await state.update_data(mail=message.text)
+            await StartDialogForm.next()
+            await message.answer("Укажи пароль от этой почты")
+        else:
+            await message.answer("Недействительный адрес почты, повтори ввод")
 
     @staticmethod
     @__dp.message_handler(Text, state=StartDialogForm.password)
@@ -81,16 +84,18 @@ class SmtpBot:
     async def cmd_send(message: types.Message):
         await SendMessageDialogForm.address.set()
         await message.answer(
-            "Приветствую, укажи адрес электронной почты на которую нужно отправить письмо"
+            "Укажи адрес электронной почты на которую нужно отправить письмо"
         )
 
     @staticmethod
     @__dp.message_handler(Text, state=SendMessageDialogForm.address)
     async def process_address(message: types.Message, state: FSMContext):
-        await state.update_data(address=message.text)
-
-        await SendMessageDialogForm.next()
-        await message.answer("Укажи заголовок письма")
+        if EmailValidator.validate_email(message.text):
+            await state.update_data(address=message.text)
+            await SendMessageDialogForm.next()
+            await message.answer("Укажи заголовок письма")
+        else:
+            await message.answer("Недействительный адрес почты, повтори ввод")
 
     @staticmethod
     @__dp.message_handler(Text, state=SendMessageDialogForm.message_subject)
