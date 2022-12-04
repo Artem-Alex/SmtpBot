@@ -65,7 +65,7 @@ class Database:
         con = cls.__sql_connection()
         cursor = con.cursor()
 
-        cursor.execute(f"DELETE mail FROM mails where id = {user_id}")
+        cursor.execute(f"DELETE FROM mails where id = {user_id}")
 
         con.commit()
         con.close()
