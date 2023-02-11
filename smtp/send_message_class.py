@@ -1,7 +1,7 @@
 import smtplib
 import ssl
 
-from smtp.config import PASSWORD, PORT
+from config import PASSWORD, PORT
 
 
 class MessageSender:

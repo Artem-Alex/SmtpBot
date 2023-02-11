@@ -19,7 +19,10 @@ class Database:
         con = cls.__sql_connection()
         cursor = con.cursor()
 
-        cursor.execute("CREATE TABLE mails(id integer PRIMARY KEY, mail text)")
+        cursor.execute("""CREATE TABLE IF NOT EXISTS mails(
+            id INTEGER PRIMARY KEY,
+            mail TEXT
+            )""")
 
         con.commit()
         con.close()

@@ -13,4 +13,4 @@ class EmailValidator:
 
 
 if __name__ == "__main__":
-    print(EmailValidator.validate_email("goreevartdsoums@yandex.com"))
+    print(EmailValidator.validate_email("dskfskdnfmnkd@yandex.com"))

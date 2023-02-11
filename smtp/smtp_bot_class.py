@@ -1,15 +1,20 @@
+import os
+
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 
-from config import TOKEN
 from form_classes import StartDialogForm, SendMessageDialogForm, MainDialogForm
 from singleton_wrapper import singleton
 from send_message_class import MessageSender
 from database_class import Database
 from keyboards import MainKeyboard
 from email_validator_class import EmailValidator
+
+from config import TOKEN
+
+TOKEN = os.getenv('TOKEN') if None else TOKEN
 
 
 @singleton
@@ -29,7 +34,19 @@ class SmtpBot:
             Database.delete_mail(message.chat.id)
 
         await StartDialogForm.mail.set()
-        await message.answer("Приветствую, укажи адрес своей электронной почты")
+        await message.reply("Приветствую, укажи адрес своей электронной почты")
+
+    @staticmethod
+    @__dp.message_handler(commands=['help'])
+    async def commands(message: types.Message, bot=__bot):
+        commands = {'/start': 'Нажмите для запуска бота', '/help': 'Нажмите для просмотра доступных команд'}
+        for command, discription in commands:
+            await bot.send_message(message.from_user.id, f'{command}\n{discription}')
+
+    @staticmethod
+    @__dp.message_handler(commands=["msg"])
+    async def get_mail():
+        pass
 
     @staticmethod
     @__dp.message_handler(commands=["continue"])
@@ -128,3 +145,8 @@ class SmtpBot:
 
         await MainDialogForm.main.set()
         await message.answer("Что хотите сделать?", reply_markup=MainKeyboard.main_kb)
+
+    @staticmethod
+    @__dp.message_handler(lambda message: message.get_command() not in (None, "/start", ...))
+    async def answer_unknown_command(self: types.Message):
+        await self.answer(f"Неизвестная команда\n\n{self.text}")
