@@ -8,7 +8,7 @@ venv/Scripts/activate
 
 cd smtp
 
-export TOKEN=6062536275:AAHEZTAprsJKyDB5e_tgHTm_hLwGt2J0R5U
+export TOKEN=$1
 
 python main_bot.py
 
