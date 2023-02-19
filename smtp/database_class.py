@@ -1,17 +1,23 @@
+import os
+import logging
 import sqlite3
 
 from sqlite3 import Error
+
+logging.basicConfig(level=logging.INFO, filename=f"{__name__}.log",
+                    format="%(asctime)s %(levelname)s %(message)s")
 
 
 class Database:
     @staticmethod
     def __sql_connection():
         try:
-            con = sqlite3.connect("smtp_bot_database.db")
+            con = sqlite3.connect("Samples/smtp_bot_database.db")
+            logging.info("Database connection")
             return con
 
         except Error:
-            print(Error)
+            logging.critical(f"The database is not connected \n {Error}", exc_info=True)
 
     @classmethod
     def create_mail_table(cls):

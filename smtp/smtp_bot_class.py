@@ -1,9 +1,12 @@
 import os
+import logging
 
+import dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.types import BotCommand
 
 from form_classes import StartDialogForm, SendMessageDialogForm, MainDialogForm
 from singleton_wrapper import singleton
@@ -12,14 +15,14 @@ from database_class import Database
 from keyboards import MainKeyboard
 from email_validator_class import EmailValidator
 
-from config import TOKEN
-
-TOKEN = os.getenv('TOKEN') if None else TOKEN
+logging.basicConfig(level=logging.INFO, filename=f"{__name__}.log", filemode="w",
+                    format="%(asctime)s %(levelname)s %(message)s")
+dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @singleton
 class SmtpBot:
-    __bot: Bot = Bot(token=TOKEN)
+    __bot: Bot = Bot(token=os.getenv('TOKEN'))
     __storage: MemoryStorage = MemoryStorage()
     __dp: Dispatcher = Dispatcher(__bot, storage=__storage)
 
@@ -30,8 +33,13 @@ class SmtpBot:
     @staticmethod
     @__dp.message_handler(commands=["start"])
     async def cmd_start(message: types.Message):
-        if Database.select_mail(message.chat.id) is not None:
-            Database.delete_mail(message.chat.id)
+        try:
+            if Database.select_mail(message.chat.id) is not None:
+                Database.delete_mail(message.chat.id)
+                logging.info("Select mail is not None")
+        except:
+            logging.error("db do not create", exc_info=True)
+            Database.create_mail_table()
 
         await StartDialogForm.mail.set()
         await message.reply("Приветствую, укажи адрес своей электронной почты")
@@ -39,9 +47,17 @@ class SmtpBot:
     @staticmethod
     @__dp.message_handler(commands=['help'])
     async def commands(message: types.Message, bot=__bot):
-        commands = {'/start': 'Нажмите для запуска бота', '/help': 'Нажмите для просмотра доступных команд'}
-        for command, discription in commands:
-            await bot.send_message(message.from_user.id, f'{command}\n{discription}')
+        # commands = {'/start': 'Нажмите для запуска бота', '/help': 'Нажмите для просмотра доступных команд'}
+        bot_commands = [
+            BotCommand(command="/help", description="Get info about me"),
+
+            # any command
+            # BotCommand(command="/qna", description="set bot for a QnA task"),
+            # BotCommand(command="/chat", description="set bot for free chat")
+        ]
+        await bot.set_my_commands(bot_commands)
+
+        # await message.answer(f'{command}\n{discription}' for command, discription in commands.items())
 
     @staticmethod
     @__dp.message_handler(commands=["msg"])
@@ -148,5 +164,5 @@ class SmtpBot:
 
     @staticmethod
     @__dp.message_handler(lambda message: message.get_command() not in (None, "/start", ...))
-    async def answer_unknown_command(self: types.Message):
-        await self.answer(f"Неизвестная команда\n\n{self.text}")
+    async def answer_unknown_command(message: types.Message):
+        await message.answer(f"Неизвестная команда\n\n{message.text}")

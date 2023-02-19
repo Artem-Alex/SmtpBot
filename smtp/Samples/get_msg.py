@@ -1,23 +1,40 @@
+# -*- encoding: utf-8 -*-
+import os
 import imaplib
-import smtplib
-from smtp.config import PASSWORD
-mail = imaplib.IMAP4_SSL('imap.gmail.com')
+import dotenv
 
-server = 'smtp.gmail.com'
+dotenv.load_dotenv(dotenv.find_dotenv())
 
-user = 'goreevartoum@gmail.com'
-password = PASSWORD
-mail.list()
-# Out: list of "folders" aka labels in gmail.
-mail.select("inbox") # connect to inbox.
-result, data = mail.search(None, "ALL")
+# mail = imaplib.IMAP4_SSL('imap.gmail.com')
+# mail.login(os.getenv("LOGIN"), os.getenv("PASSWORD"))
+#
+# # mail.list()
+# mail.select()
+#
+# typ, data = mail.search(None, 'ALL')
+# for num in data[0].split():
+#     typ, data = mail.fetch(num, '(RFC822)')
+#     print('Message %s\n%s\n' % (num, data[0][1]))
+# mail.close()
+# mail.logout()
 
-ids = data[0] # data is a list.
-id_list = ids.split() # ids is a space separated string
-latest_email_id = id_list[-1] # get the latest
 
-# fetch the email body (RFC822) for the given ID
-result, data = mail.fetch(latest_email_id, "(RFC822)")
+import imaplib
 
-raw_email = data[0][1] # here's the body, which is raw text of the whole email
-# including headers and alternate payloads
+
+def login_credentials():
+    return "mail", "password"
+
+
+def connect_imap():
+    mail = imaplib.IMAP4_SSL("imap.gmail.com", 993)
+    details = login_credentials()
+    mail.login(os.getenv("LOGIN"), os.getenv("PASSWORD"))
+    return mail
+
+
+m = connect_imap()
+ddate = '22-Apr-2022'
+m.select("INBOX")
+result, data = m.uid('search', None, '(SENTON %s)' % ddate)
+print(result)

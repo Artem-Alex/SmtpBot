@@ -1,4 +1,8 @@
+import logging
+
 from email_validator import validate_email, EmailNotValidError
+
+logging.basicConfig(level=logging.INFO, filename="email.log", filemode="w")
 
 
 class EmailValidator:
@@ -8,7 +12,7 @@ class EmailValidator:
             validate_email(email, check_deliverability=False)
             return True
         except EmailNotValidError as e:
-            print(f"FAIL:{e}")
+            logging.error(f"FAIL:{e}")
             return False
 
 

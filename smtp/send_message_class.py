@@ -1,6 +1,8 @@
+import logging
 import smtplib
 import ssl
 
+logging.basicConfig(level=logging.INFO, filename="f{__name__}.log", filemode="w")
 from config import PASSWORD, PORT
 
 
@@ -24,4 +26,4 @@ class MessageSender:
             server.ehlo()
             server.login(self.__login, PASSWORD)
             server.sendmail(self.__login, self.__address, self.__message.encode())
-            print("[INFO] Mail send")
+            logging.info("Mail send")
