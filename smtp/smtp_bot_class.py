@@ -19,7 +19,6 @@ logging.basicConfig(level=logging.INFO, filename=f"{__name__}.log", filemode="w"
                     format="%(asctime)s %(levelname)s %(message)s")
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-
 @singleton
 class SmtpBot:
     __bot: Bot = Bot(token=os.getenv('TOKEN'))

@@ -1,9 +1,15 @@
 import logging
 import smtplib
 import ssl
+import dotenv
+import os
 
+
+dotenv.load_dotenv(dotenv.find_dotenv())
 logging.basicConfig(level=logging.INFO, filename="f{__name__}.log", filemode="w")
-from config import PASSWORD, PORT
+
+PORT = int(os.getenv('PORT'))
+PASSWORD = os.getenv('PASSWORD')
 
 
 class MessageSender:
