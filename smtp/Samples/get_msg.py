@@ -5,6 +5,7 @@ import dotenv
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
+
 # mail = imaplib.IMAP4_SSL('imap.gmail.com')
 # mail.login(os.getenv("LOGIN"), os.getenv("PASSWORD"))
 #
@@ -17,10 +18,6 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 #     print('Message %s\n%s\n' % (num, data[0][1]))
 # mail.close()
 # mail.logout()
-
-
-import imaplib
-
 
 def login_credentials():
     return "mail", "password"
@@ -37,4 +34,4 @@ m = connect_imap()
 ddate = '22-Apr-2022'
 m.select("INBOX")
 result, data = m.uid('search', None, '(SENTON %s)' % ddate)
-print(result)
+print(data)
